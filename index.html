@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Malla Curricular Ingeniería Química</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f7f9;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .grid {
+      display: flex;
+      gap: 20px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+    }
+    .nivel {
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      padding: 10px;
+      min-width: 250px;
+    }
+    .nivel h2 {
+      font-size: 18px;
+      color: #2980b9;
+      text-align: center;
+    }
+    .materia {
+      background: #ecf0f1;
+      margin: 8px 0;
+      padding: 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.3s;
+    }
+    .materia.aprobada {
+      background: #2ecc71;
+      color: white;
+      text-decoration: line-through;
+    }
+    .materia.bloqueada {
+      background: #bdc3c7;
+      cursor: not-allowed;
+    }
+    .materia:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      background: #333;
+      color: #fff;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: pre-line;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>Malla Curricular - Ingeniería Química</h1>
+  <div class="grid" id="malla"></div>
+
+  <script>
+    const materias = {
+      "Primer Nivel": [
+        {nombre: "Introducción a la Ingeniería Química", reqs: []},
+        {nombre: "Ingeniería y Sociedad", reqs: []},
+        {nombre: "Algebra y Geometría Analítica", reqs: []},
+        {nombre: "Análisis Matemático I", reqs: []},
+        {nombre: "Análisis Matemático II", reqs: ["Algebra y Geometría Analítica", "Análisis Matemático I"]},
+        {nombre: "Química", reqs: []},
+        {nombre: "Sistemas de Representación", reqs: []},
+        {nombre: "Inglés I", reqs: []},
+        {nombre: "Fundamentos de Informática", reqs: []}
+      ],
+      "Segundo Nivel": [
+        {nombre: "Introducción a Equipos y Procesos", reqs: ["Introducción a la Ingeniería Química", "Química"]},
+        {nombre: "Probabilidad y Estadística", reqs: ["Algebra y Geometría Analítica", "Análisis Matemático I"]},
+        {nombre: "Química Inorgánica", reqs: ["Química"]},
+        {nombre: "Física I", reqs: ["Análisis Matemático I"]},
+        {nombre: "Física II", reqs: ["Análisis Matemático I", "Física I"]},
+        {nombre: "Química Orgánica", reqs: ["Química"]},
+        {nombre: "Inglés II", reqs: ["Inglés I"]},
+        {nombre: "Matemática Superior Aplicada", reqs: ["Análisis Matemático II", "Algebra y Geometría Analítica", "Análisis Matemático I"]}
+      ]
+      // Continúa con el resto de niveles...
+    };
+
+    const aprobadas = JSON.parse(localStorage.getItem('materias_aprobadas') || '[]');
+
+    function esAprobada(nombre) {
+      return aprobadas.includes(nombre);
+    }
+
+    function requisitosCumplidos(materia) {
+      return materia.reqs.every(req => esAprobada(req));
+    }
+
+    function guardar() {
+      localStorage.setItem('materias_aprobadas', JSON.stringify(aprobadas));
+    }
+
+    function render() {
+      const container = document.getElementById("malla");
+      container.innerHTML = "";
+
+      for (const nivel in materias) {
+        const columna = document.createElement("div");
+        columna.className = "nivel";
+        const titulo = document.createElement("h2");
+        titulo.textContent = nivel;
+        columna.appendChild(titulo);
+
+        materias[nivel].forEach(materia => {
+          const div = document.createElement("div");
+          div.className = "materia";
+          div.textContent = materia.nombre;
+
+          if (esAprobada(materia.nombre)) {
+            div.classList.add("aprobada");
+          } else if (!requisitosCumplidos(materia)) {
+            div.classList.add("bloqueada");
+            const faltantes = materia.reqs.filter(req => !esAprobada(req));
+            div.dataset.tooltip = "Faltan: " + faltantes.join("\n");
+          }
+
+          div.onclick = () => {
+            if (div.classList.contains("bloqueada")) return;
+
+            const index = aprobadas.indexOf(materia.nombre);
+            if (index >= 0) {
+              aprobadas.splice(index, 1);
+            } else {
+              aprobadas.push(materia.nombre);
+            }
+            guardar();
+            render();
+          };
+
+          columna.appendChild(div);
+        });
+
+        container.appendChild(columna);
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>
+<script>
+const materias = {
+  "Primer Nivel": [
+    {nombre: "Introducción a la Ingeniería Química", reqs: []},
+    {nombre: "Ingeniería y Sociedad", reqs: []},
+    {nombre: "Algebra y Geometría Analítica", reqs: []},
+    {nombre: "Análisis Matemático I", reqs: []},
+    {nombre: "Análisis Matemático II", reqs: ["Algebra y Geometría Analítica", "Análisis Matemático I"]},
+    {nombre: "Química", reqs: []},
+    {nombre: "Sistemas de Representación", reqs: []},
+    {nombre: "Inglés I", reqs: []},
+    {nombre: "Fundamentos de Informática", reqs: []}
+  ],
+  "Segundo Nivel": [
+    {nombre: "Introducción a Equipos y Procesos", reqs: ["Introducción a la Ingeniería Química", "Química"]},
+    {nombre: "Probabilidad y Estadística", reqs: ["Algebra y Geometría Analítica", "Análisis Matemático I"]},
+    {nombre: "Química Inorgánica", reqs: ["Química"]},
+    {nombre: "Física I", reqs: ["Análisis Matemático I"]},
+    {nombre: "Física II", reqs: ["Análisis Matemático I", "Física I"]},
+    {nombre: "Química Orgánica", reqs: ["Química"]},
+    {nombre: "Inglés II", reqs: ["Inglés I"]},
+    {nombre: "Matemática Superior Aplicada", reqs: ["Análisis Matemático II", "Algebra y Geometría Analítica", "Análisis Matemático I"]}
+  ],
+  "Tercer Nivel": [
+    {nombre: "Balance de Masa y Energía", reqs: ["Química", "Sistemas de Representación", "Fundamentos de Informática", "Física II", "Introducción a Equipos y Procesos", "Introducción a la Ingeniería Química", "Algebra y Geometría Analítica", "Análisis Matemático I"]},
+    {nombre: "Economía", reqs: ["Introducción a Equipos y Procesos", "Ingeniería y Sociedad", "Algebra y Geometría Analítica"]},
+    {nombre: "Química Aplicada", reqs: ["Física II", "Introducción a Equipos y Procesos", "Química Inorgánica", "Química Orgánica", "Introducción a la Ingeniería Química", "Ingeniería y Sociedad", "Química", "Inglés I"]},
+    {nombre: "Termodinámica", reqs: ["Química Inorgánica", "Análisis Matemático II", "Física II", "Análisis Matemático I", "Química"]},
+    {nombre: "Ciencia de los Materiales", reqs: ["Introducción a Equipos y Procesos", "Química Inorgánica", "Química Orgánica", "Introducción a la Ingeniería Química", "Química"]},
+    {nombre: "Química Analítica", reqs: ["Probabilidad y Estadística", "Química Inorgánica", "Química Orgánica", "Ingeniería y Sociedad", "Química"]},
+    {nombre: "Microbiología y Química Biológica", reqs: ["Química Inorgánica", "Química Orgánica", "Química"]},
+    {nombre: "Físicoquímica", reqs: ["Introducción a Equipos y Procesos", "Análisis Matemático II", "Física II", "Algebra y Geometría Analítica", "Análisis Matemático I", "Química"]},
+    {nombre: "Legislación", reqs: ["Introducción a la Ingeniería Química", "Ingeniería y Sociedad"]},
+    {nombre: "Fenómenos de Transporte", reqs: ["Introducción a Equipos y Procesos", "Análisis Matemático II", "Física II", "Algebra y Geometría Analítica", "Análisis Matemático I", "Química"]}
+  ],
+  "Cuarto Nivel": [
+    {nombre: "Diseño, Simulación, Optimización y Seguridad de Procesos", reqs: ["Balance de Masa y Energía", "Matemática Superior Aplicada", "Sistemas de Representación", "Fundamentos de Informática", "Análisis Matemático II", "Inglés II", "Introducción a Equipos y Procesos"]},
+    {nombre: "Operaciones Unitarias I", reqs: ["Balance de Masa y Energía", "Termodinámica", "Fenómenos de Transporte", "Análisis Matemático II", "Física II", "Introducción a Equipos y Procesos"]},
+    {nombre: "Tecnología de la Energía Térmica", reqs: ["Balance de Masa y Energía", "Termodinámica", "Físicoquímica", "Fenómenos de Transporte", "Análisis Matemático II", "Física II", "Introducción a Equipos y Procesos"]},
+    {nombre: "Organización Industrial", reqs: ["Probabilidad y Estadística", "Ingeniería y Sociedad", "Introducción a Equipos y Procesos", "Legislación"]},
+    {nombre: "Ingeniería de las Reacciones Químicas", reqs: ["Balance de Masa y Energía", "Termodinámica", "Físicoquímica", "Fenómenos de Transporte", "Análisis Matemático II", "Química Inorgánica", "Química Orgánica"]},
+    {nombre: "Operaciones Unitarias II", reqs: ["Termodinámica", "Físicoquímica", "Fenómenos de Transporte", "Análisis Matemático II", "Física II", "Química Orgánica", "Introducción a Equipos y Procesos"]},
+    {nombre: "Mecánica Industrial", reqs: ["Introducción a Equipos y Procesos", "Físicoquímica", "Física I", "Química Inorgánica", "Ciencia de los Materiales"]}
+  ]
+};
+  "Quinto Nivel": [
+    {nombre: "Procesos Biotecnológicos", reqs: ["Balance de Masa y Energía", "Físicoquímica", "Fenómenos de Transporte", "Microbiología y Química Biológica", "Introducción a Equipos y Procesos", "Química Inorgánica", "Química Orgánica"]},
+    {nombre: "Control Automático de Procesos", reqs: ["Diseño, Simulación, Optimización y Seguridad de Procesos", "Operaciones Unitarias II", "Balance de Masa y Energía", "Matemática Superior Aplicada", "Química Analítica"]},
+    {nombre: "Máquinas e Instalaciones Eléctricas", reqs: ["Operaciones Unitarias I", "Introducción a Equipos y Procesos", "Física II"]},
+    {nombre: "Ingeniería Ambiental", reqs: ["Química Aplicada", "Operaciones Unitarias I", "Operaciones Unitarias II", "Ingeniería de las Reacciones Químicas", "Legislación"]},
+    {nombre: "Calidad y Control Estadístico de Procesos", reqs: ["Probabilidad y Estadística", "Química Inorgánica", "Química Orgánica", "Balance de Masa y Energía", "Química Analítica", "Análisis Matemático I"]},
+    {nombre: "Higiene y Seguridad en el Trabajo", reqs: ["Introducción a Equipos y Procesos"]},
+    {nombre: "Proyecto Final", reqs: ["Diseño, Simulación, Optimización y Seguridad de Procesos", "Operaciones Unitarias I", "Tecnología de la Energía Térmica", "Operaciones Unitarias II", "Ingeniería de las Reacciones Químicas", "Organización Industrial", "Balance de Masa y Energía", "Físicoquímica", "Fenómenos de Transporte", "Química Aplicada", "Economía"]},
+    {nombre: "Práctica Profesional Supervisada", reqs: ["Diseño, Simulación, Optimización y Seguridad de Procesos", "Operaciones Unitarias I", "Tecnología de la Energía Térmica", "Operaciones Unitarias II", "Ingeniería de las Reacciones Químicas", "Organización Industrial", "Balance de Masa y Energía", "Físicoquímica", "Fenómenos de Transporte", "Química Aplicada", "Economía"]}
+  ],
+  "Asignaturas Electivas": [
+    {nombre: "Gestión de la Calidad", reqs: ["Introducción a la Ingeniería Química", "Ingeniería y Sociedad"]},
+    {nombre: "Cálculo por Elementos Finitos", reqs: ["Matemática Superior Aplicada", "Análisis Matemático II"]},
+    {nombre: "Radioquímica y Aplicaciones Nucleares", reqs: ["Física II", "Química", "Análisis Matemático I"]},
+    {nombre: "Electrónica para Ingeniería Química", reqs: ["Física II", "Física I"]},
+    {nombre: "Electrónica para Ingeniería Química II", reqs: ["Física II", "Física I"]},
+    {nombre: "Diseño de Equipos", reqs: ["Operaciones Unitarias II", "Ingeniería de las Reacciones Químicas", "Balance de Masa y Energía", "Termodinámica"]},
+    {nombre: "Alimentos de Origen Animal", reqs: ["Legislación", "Economía", "Operaciones Unitarias I", "Operaciones Unitarias II", "Balance de Masa y Energía", "Microbiología y Química Biológica", "Química Analítica"]},
+    {nombre: "Alimentos de Origen Vegetal", reqs: ["Legislación", "Economía", "Operaciones Unitarias I", "Operaciones Unitarias II", "Balance de Masa y Energía", "Microbiología y Química Biológica", "Química Analítica"]},
+    {nombre: "Biotecnología Ambiental", reqs: ["Operaciones Unitarias I", "Ingeniería de las Reacciones Químicas", "Microbiología y Química Biológica", "Legislación"]},
+    {nombre: "Tratamiento Fisicoquímico de Efluentes", reqs: ["Operaciones Unitarias I", "Operaciones Unitarias II", "Físicoquímica", "Química Analítica"]},
+    {nombre: "Aplicaciones Biotecnológicas de Biorreactores", reqs: ["Ingeniería de las Reacciones Químicas", "Operaciones Unitarias II", "Procesos Biotecnológicos", "Microbiología y Química Biológica", "Química Analítica"]},
+    {nombre: "Bioprocesos en la Industria", reqs: ["Operaciones Unitarias I", "Operaciones Unitarias II", "Procesos Biotecnológicos", "Microbiología y Química Biológica", "Química Analítica"]},
+    {nombre: "Tecnología de los Alimentos", reqs: ["Microbiología y Química Biológica", "Operaciones Unitarias II", "Balance de Masa y Energía", "Química Analítica"]},
+    {nombre: "Reactores Nucleares", reqs: ["Operaciones Unitarias I", "Tecnología de la Energía Térmica", "Fenómenos de Transporte", "Físicoquímica"]}
+  ]
+};
